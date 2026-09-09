@@ -2,6 +2,7 @@ from flask import Flask
 app = Flask(__name__)
 @app.route('/')
 def home():
-    return "<h1>BABU's PRO Site is LIVE! 🚀</h1><p>Day 4 - GitHub to World!</p>"
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=9080)
+    return """
+    <h1 style='text-align:center;margin-top:100px;font-family:sans-serif'>BABU's PRO Site LIVE! 🚀</h1>
+    <p style='text-align:center'>Deployed from Termux + GitHub</p>
+    """
