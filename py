@@ -1,0 +1,9 @@
+Yfrom flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "<h1>Hello from Siuri! My first website is live 🔥</h1><p>Created in Termux</p>"
+
+app.run(host='0.0.0.0', port=8080)delet
+
