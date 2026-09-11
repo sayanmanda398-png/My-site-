@@ -4,7 +4,13 @@ app = Flask(__name__)
 app.secret_key = "babu_pro_123"
 os.makedirs('static/uploads', exist_ok=True)
 ADMIN_USER = "Sayan"
-ADMIN_PASS = "Sayan@123" # <--- YOUR ADMIN PASSWORD
+ADMIN_PASS = "Sayan@123"
+
+def ist_now():
+    # IST = UTC + 5:30
+    utc = datetime.datetime.utcnow()
+    ist = utc + datetime.timedelta(hours=5, minutes=30)
+    return ist.strftime("%I:%M %p - %d/%m")
 
 def init_db():
     conn=sqlite3.connect('users.db')
@@ -39,10 +45,8 @@ body{margin:0;min-height:100vh;background:#0a0a20;display:flex;justify-content:c
 .post-form{background:rgba(0,0,0,0.2);border-radius:20px;padding:10px;margin:10px 0;width:100%;box-sizing:border-box}
 .admin-card{background:rgba(255,255,255,0.1);border-radius:15px;padding:12px;margin:8px 0;font-size:12px;word-wrap:break-word}
 """
-
 @app.route('/static/uploads/<path:f>')
 def up(f): return send_from_directory('static/uploads', f)
-
 @app.route('/', methods=['GET','POST'])
 def home():
     user=session.get('user')
@@ -59,7 +63,7 @@ def home():
             media_name=f"post_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_{user}.{ext}"
             media_file.save(os.path.join('static/uploads',media_name))
         if txt or media_name:
-            now=datetime.datetime.now().strftime("%I:%M %p")
+            now=ist_now()
             cur.execute('INSERT INTO posts (username,content,time,likes,media,mtype) VALUES (?,?,?,?,?,?)',(user,txt,now,0,media_name,mtype))
             conn.commit()
     cur.execute('SELECT photo FROM users WHERE username=?',(user,)); pr=cur.fetchone(); photo=pr[0] if pr and pr[0] else None
@@ -78,53 +82,47 @@ def home():
         if media:
             if mtype=='video': media_html=f"<video class='post-media' controls src='/static/uploads/{media}'></video>"
             else: media_html=f"<img class='post-media' src='/static/uploads/{media}'>"
-        chat_html+=f"<div class='chat-pill'><div style='display:flex;justify-content:space-between'><b style='font-size:10px;opacity:0.7'>@{uname} • {tm}</b>{del_btn}</div><div style='margin-top:6px'>{cont}</div>{media_html}<div style='margin-top:8px'><a href='/like/{pid}' style='color:#00e5ff;text-decoration:none'>❤️{likes}</a></div>{comm_html}<form action='/comment/{pid}' method='POST' style='margin-top:6px;display:flex;gap:5px'><input class='comment-input' name='cmt' placeholder='Add comment...' required><button style='background:#5a7cff;border:none;border-radius:15px;padding:5px 10px;color:white;font-size:10px;min-width:45px'>Reply</button></form></div>"
+        chat_html+=f"<div class='chat-pill'><div style='display:flex;justify-content:space-between'><b style='font-size:10px;opacity:0.7'>@{uname} • {tm} 🇮🇳</b>{del_btn}</div><div style='margin-top:6px'>{cont}</div>{media_html}<div style='margin-top:8px'><a href='/like/{pid}' style='color:#00e5ff;text-decoration:none'>❤️{likes}</a></div>{comm_html}<form action='/comment/{pid}' method='POST' style='margin-top:6px;display:flex;gap:5px'><input class='comment-input' name='cmt' placeholder='Add comment...' required><button style='background:#5a7cff;border:none;border-radius:15px;padding:5px 10px;color:white;font-size:10px;min-width:45px'>Reply</button></form></div>"
     conn.close()
     if not chat_html: chat_html="<div class='chat-pill' style='opacity:0.5;text-align:center'>No posts yet. Upload photo/video!</div>"
     photo_html = f"<img src='/static/uploads/{photo}'>" if photo else f"<div style='font-size:40px'>👤</div><div style='font-size:12px'>@{user}</div>"
     admin_link = f"<a class='icon-btn' href='/admin' style='background:#ffaa00'>👑</a>" if user==ADMIN_USER else ""
     return f"""<html><head><meta name='viewport' content='width=device-width, initial-scale=1'><style>{CSS}</style></head><body><div class='phone'>
     <div class='top-bar'><div class='top-left'><a class='icon-btn' href='#' onclick="document.getElementById('searchArea').style.display='flex';return false">🔍</a><div style='font-weight:bold;font-size:14px'>@{user}</div></div><div class='top-right'>{admin_link}<a class='icon-btn' href='/'>🌙</a><a class='icon-btn' href='/logout'>⎋</a></div></div>
-    <div id='searchArea' class='search-box' style='display:{"flex" if q else "none"}'><form method='GET' style='display:flex;gap:5px;width:100%'><input class='search-inp' name='q' value='{q}' placeholder='Search users or posts...'><button class='icon-btn' style='width:42px;min-width:42px'>Go</button><a class='icon-btn' href='/'>✕</a></form></div>
+    <div id='searchArea' class='search-box' style='display:{"flex" if q else "none"}'><form method='GET' style='display:flex;gap:5px;width:100%'><input class='search-inp' name='q' value='{q}' placeholder='Search...'><button class='icon-btn' style='width:42px;min-width:42px'>Go</button><a class='icon-btn' href='/'>✕</a></form></div>
     <div class='user-photo-box'>{photo_html}<form action='/upload_photo' method='POST' enctype='multipart/form-data' style='position:absolute;bottom:8px;right:10px'><label style='background:#5a7cff;padding:5px 10px;border-radius:15px;font-size:10px;cursor:pointer'>📷 Change<input type='file' name='photo' accept='image/*' hidden onchange='this.form.submit()'></label></form></div>
     <div style='text-align:center;font-size:10px;opacity:0.6'>{len(posts)} posts • Babu Pro • @ {user}</div>
-    <form class='post-form' method='POST' enctype='multipart/form-data'><div style='display:flex;gap:5px'><input name='content' placeholder='Type a message...' style='flex:1;min-width:0;background:rgba(80,80,130,0.5);border:2px dashed rgba(255,255,255,0.15);border-radius:30px;padding:10px 15px;color:white;outline:none'><button style='background:#5a7cff;border:none;border-radius:50%;width:38px;min-width:38px;height:38px;color:white'>↑</button></div><div style='margin-top:8px;display:flex;gap:8px;align-items:center'><label style='background:rgba(255,255,255,0.15);padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer'>📷 Photo/Video<input type='file' name='media' accept='image/*,video/*' hidden></label><span style='font-size:10px;opacity:0.6'>Upload with post</span></div></form>
+    <form class='post-form' method='POST' enctype='multipart/form-data'><div style='display:flex;gap:5px'><input name='content' placeholder='Type a message...' style='flex:1;min-width:0;background:rgba(80,80,130,0.5);border:2px dashed rgba(255,255,255,0.15);border-radius:30px;padding:10px 15px;color:white;outline:none'><button style='background:#5a7cff;border:none;border-radius:50%;width:38px;min-width:38px;height:38px;color:white'>↑</button></div><div style='margin-top:8px;display:flex;gap:8px;align-items:center'><label style='background:rgba(255,255,255,0.15);padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer'>📷 Photo/Video<input type='file' name='media' accept='image/*,video/*' hidden></label><span style='font-size:10px;opacity:0.6'>IST 🇮🇳</span></div></form>
     <div style='max-height:380px;overflow-y:auto;padding-right:2px'>{chat_html}</div>
     </div></body></html>"""
 
 @app.route('/admin', methods=['GET','POST'])
 def admin():
     user=session.get('user')
-    if user!=ADMIN_USER: return "<html><body style='background:#111;color:white;text-align:center;padding:50px'><h1>⛔ Not Admin</h1><p>Only Sayan</p><a href='/' style='color:#5a7cff'>Back</a></body></html>"
-    # Password check
+    if user!=ADMIN_USER: return "<html><body style='background:#111;color:white;text-align:center;padding:50px'><h1>⛔ Not Admin</h1><a href='/'>Back</a></body></html>"
     if request.method=='POST':
         pw=request.form.get('admin_pass','')
-        if pw==ADMIN_PASS:
-            session['is_admin']=True
-        else:
-            return f"<html><head><meta name='viewport' content='width=device-width, initial-scale=1'><style>{CSS}</style></head><body><div class='phone'><div style='text-align:center;padding:40px'><h2>❌ Wrong Password!</h2><p>Try again</p><a href='/admin' style='color:#5a7cff'>Back</a></div></div></body></html>"
+        if pw==ADMIN_PASS: session['is_admin']=True
+        else: return f"<html><head><meta name='viewport' content='width=device-width, initial-scale=1'><style>{CSS}</style></head><body><div class='phone'><div style='text-align:center;padding:40px'><h2>❌ Wrong Password!</h2><a href='/admin' style='color:#5a7cff'>Try Again</a></div></div></body></html>"
     if not session.get('is_admin'):
         return f"""<html><head><meta name='viewport' content='width=device-width, initial-scale=1'><style>{CSS}</style></head><body><div class='phone'>
         <div class='top-bar'><div class='top-left'><a class='icon-btn' href='/'>←</a><b>👑 ADMIN LOCK</b></div></div>
         <div style='text-align:center;padding:30px 10px'>
-        <div style='font-size:50px'>🔒</div><h3>Admin Password Required</h3><p style='font-size:12px;opacity:0.7'>Enter password to access admin panel</p>
+        <div style='font-size:50px'>🔒</div><h3>Admin Password Required</h3><p style='font-size:12px;opacity:0.7'>Only owner can access</p>
         <form method='POST' style='margin-top:20px'><input name='admin_pass' type='password' placeholder='Enter Admin Password' style='width:100%;background:rgba(80,80,130,0.5);border:2px dashed rgba(255,255,255,0.15);border-radius:30px;padding:14px 20px;color:white;box-sizing:border-box;text-align:center' required><button style='width:100%;background:linear-gradient(90deg,#ffaa00,#ff6a00);border:none;padding:14px;border-radius:10px;font-weight:800;color:black;margin-top:12px;cursor:pointer'>Unlock Admin 🔓</button></form>
-        <p style='font-size:10px;opacity:0.5;margin-top:15px'>Hint: {ADMIN_PASS[:3]}*** (default is Sayan@123)</p>
         </div></div></body></html>"""
-    # Authenticated - show panel
     conn=sqlite3.connect('users.db'); cur=conn.cursor()
     cur.execute('SELECT username,email,photo FROM users'); users=cur.fetchall()
     cur.execute('SELECT COUNT(*), SUM(likes) FROM posts'); stats=cur.fetchone(); total_posts=stats[0] or 0; total_likes=stats[1] or 0
     cur.execute('SELECT id,username,content,time,media FROM posts ORDER BY id DESC'); posts=cur.fetchall()
     conn.close()
-    users_html="".join([f"<div class='admin-card'><b>@{u}</b> • {e} <a href='/admin_del_user/{u}' style='color:#ff6b6b;float:right;text-decoration:none'>Delete</a></div>" for u,e,ph in users])
+    users_html="".join([f"<div class='admin-card'><b>@{u}</b> • {e} <a href='/admin_del_user/{u}' style='color:#ff6b6b;float:right'>Delete</a></div>" for u,e,ph in users])
     posts_html="".join([f"<div class='admin-card'><b>#{pid} @{un}</b> • {tm}<br>{ct[:50]} <a href='/delete/{pid}' style='color:#ff6b6b;float:right'>✕</a></div>" for pid,un,ct,tm,md in posts[:20]])
-    return f"<html><head><meta name='viewport' content='width=device-width, initial-scale=1'><style>{CSS}</style></head><body><div class='phone'><div class='top-bar'><div class='top-left'><a class='icon-btn' href='/'>←</a><b>👑 ADMIN</b></div><div class='top-right'><a class='icon-btn' href='/admin_logout'>🔒</a></div></div><div style='background:linear-gradient(90deg,#ffaa00,#ff6a00);padding:15px;border-radius:20px;margin:10px 0;text-align:center;color:black'><div style='font-size:26px;font-weight:800'>{total_posts} Posts</div><div style='font-size:13px'>{len(users)} Users • {total_likes} Likes • 🔓 Unlocked</div></div><h3 style='font-size:12px'>USERS ({len(users)})</h3><div style='max-height:200px;overflow:auto'>{users_html}</div><h3 style='font-size:12px;margin-top:15px'>RECENT POSTS</h3><div style='max-height:300px;overflow:auto'>{posts_html}</div></div></body></html>"
+    return f"<html><head><meta name='viewport' content='width=device-width, initial-scale=1'><style>{CSS}</style></head><body><div class='phone'><div class='top-bar'><div class='top-left'><a class='icon-btn' href='/'>←</a><b>👑 ADMIN</b></div><div class='top-right'><a class='icon-btn' href='/admin_logout'>🔒</a></div></div><div style='background:linear-gradient(90deg,#ffaa00,#ff6a00);padding:15px;border-radius:20px;margin:10px 0;text-align:center;color:black'><div style='font-size:26px;font-weight:800'>{total_posts} Posts</div><div style='font-size:13px'>{len(users)} Users • {total_likes} Likes</div></div><h3 style='font-size:12px'>USERS ({len(users)})</h3><div style='max-height:200px;overflow:auto'>{users_html}</div><h3 style='font-size:12px;margin-top:15px'>RECENT POSTS</h3><div style='max-height:300px;overflow:auto'>{posts_html}</div></div></body></html>"
 
 @app.route('/admin_logout')
 def admin_logout():
     session.pop('is_admin',None); return redirect('/admin')
-
 @app.route('/admin_del_user/<u>')
 def admin_del_user(u):
     if session.get('user')!=ADMIN_USER or not session.get('is_admin'): return redirect('/admin')
@@ -146,7 +144,7 @@ def comment(pid):
     if not user: return redirect('/login')
     c=request.form.get('cmt')
     if c:
-        now=datetime.datetime.now().strftime("%I:%M %p")
+        now=ist_now()
         conn=sqlite3.connect('users.db'); conn.execute('INSERT INTO comments VALUES (NULL,?,?,?,?)',(pid,user,c,now)); conn.commit(); conn.close()
     return redirect('/')
 @app.route('/like/<int:pid>')
