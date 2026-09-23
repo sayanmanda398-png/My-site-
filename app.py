@@ -13,15 +13,19 @@ def init_db():
     conn.commit(); conn.close()
 init_db()
 CSS = """
-body{margin:0;min-height:100vh;background:#08081a;display:flex;justify-content:center;padding:20px 0;font-family:system-ui,sans-serif}
-.phone{width:100%;max-width:380px;min-height:850px;background:linear-gradient(180deg,#2e40e6 0%, #1a2480 45%, #050516 100%);border-radius:40px;padding:16px;box-shadow:0 0 0 8px #e8e8e8, 0 30px 80px rgba(0,0,0,0.7);box-sizing:border-box;color:white}
-.top{ display:flex; justify-content:space-between; align-items:center; padding:6px 4px }
-.pill{ background:rgba(40,50,150,0.75); border-radius:28px; padding:14px; margin:10px 0; border:1px solid rgba(255,255,255,0.12) }
-.stat{ display:flex; gap:18px; justify-content:center; margin:10px 0; font-size:12px }
-.post{ background:#2a2fb8; border-radius:22px; padding:12px 14px; margin:10px 0 }
-.btn{ background:#5a7cff; color:white; padding:7px 16px; border-radius:20px; text-decoration:none; font-size:12px; border:none; display:inline-block }
-.btn2{ background:rgba(255,255,255,0.18); color:white; padding:7px 16px; border-radius:20px; text-decoration:none; font-size:12px; border:1px solid rgba(255,255,255,0.25); display:inline-block }
-.inp{ width:100%; padding:12px 16px; border-radius:28px; border:none; outline:none; box-sizing:border-box }
+body{margin:0;min-height:100vh;background:#050010 url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800') center/cover fixed;display:flex;justify-content:center;padding:20px 0;font-family:system-ui,sans-serif}
+body::before{content:'';position:fixed;inset:0;background:rgba(10,0,30,0.75);backdrop-filter:blur(2px);z-index:-1}
+.phone{width:100%;max-width:380px;min-height:850px;background:linear-gradient(180deg,rgba(30,5,60,0.95),rgba(10,2,30,0.97));border-radius:40px;padding:16px;box-shadow:0 0 25px #ff4fd8,0 0 60px #7c4dff,0 0 0 3px #ff8de0 inset;color:#ffe9ff;border:2px solid #ff4fd8;box-sizing:border-box;position:relative;overflow:hidden}
+.phone::before{content:'🌸🌺🌷🌻🌹';position:absolute;top:-10px;left:0;right:0;text-align:center;font-size:28px;opacity:0.25;pointer-events:none;filter:drop-shadow(0 0 10px #ff4fd8)}
+.top{ display:flex; justify-content:space-between; align-items:center; padding:10px 4px; text-shadow:0 0 10px #ff4fd8 }
+.pill{ background:rgba(40,10,80,0.6); border-radius:28px; padding:14px; margin:10px 0; border:1px solid #ff4fd8; box-shadow:0 0 15px rgba(255,79,216,0.4), inset 0 0 20px rgba(124,77,255,0.2); backdrop-filter:blur(10px) }
+.stat{ display:flex; gap:18px; justify-content:center; margin:10px 0; font-size:12px; color:#ffccf5 }
+.post{ background:linear-gradient(135deg,rgba(80,20,120,0.7),rgba(30,10,60,0.7)); border-radius:22px; padding:12px 14px; margin:10px 0; border:1px solid #00f0ff; box-shadow:0 0 12px rgba(0,240,255,0.35) }
+.btn{ background:linear-gradient(90deg,#ff4fd8,#7c4dff); color:white; padding:7px 16px; border-radius:20px; text-decoration:none; font-size:12px; border:none; display:inline-block; box-shadow:0 0 15px #ff4fd8; font-weight:bold }
+.btn2{ background:rgba(0,240,255,0.15); color:#aef7ff; padding:7px 16px; border-radius:20px; text-decoration:none; font-size:12px; border:1px solid #00f0ff; display:inline-block; box-shadow:0 0 10px rgba(0,240,255,0.4) }
+.inp{ width:100%; padding:12px 16px; border-radius:28px; border:1px solid #ff4fd8; outline:none; box-sizing:border-box; background:rgba(20,5,40,0.8); color:#ffe9ff; box-shadow:0 0 10px rgba(255,79,216,0.3) }
+.inp::placeholder{color:#d99ac9}
+a{color:#00f0ff}
 """
 @app.route('/static/uploads/<f>')
 def upl(f): return send_from_directory('static/uploads', f)
