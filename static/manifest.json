@@ -1,0 +1,14 @@
+{
+  "name": "Life Garden - Grow Your Life",
+  "short_name": "Life Garden",
+  "start_url": "/feed",
+  "display": "standalone",
+  "background_color": "#050010",
+  "theme_color": "#ff4fd8",
+  "icons": [{
+    "src": "https://cdn-icons-png.flaticon.com/512/628/628283.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "any maskable"
+  }]
+}
